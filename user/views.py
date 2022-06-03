@@ -31,11 +31,14 @@ def login(request):
         id = request.POST.get('id')
         password = request.POST.get('password')
         user = User.objects.get(id=id)
-        if user.password == password:
-            request.session['id'] = id
-            return JsonResponse({'errno': 0, 'msg': "登录成功"})
+        if user.exists():
+            if user.password == password:
+                request.session['id'] = id
+                return JsonResponse({'errno': 0, 'msg': "登录成功"})
+            else:
+                return JsonResponse({'errno': 2003, 'msg': "密码错误"})
         else:
-            return JsonResponse({'errno': 2002, 'msg': "密码错误"})
+            return JsonResponse({'errno': 2002, 'msg': "用户未注册"})
     else:
         return JsonResponse({'errno': 2001, 'msg': "请求方式错误"})
 
