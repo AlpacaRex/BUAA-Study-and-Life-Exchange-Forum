@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+
+from post.models import Post, History, Favorites
 from user.models import *
 from django.http import JsonResponse
 
@@ -110,3 +112,66 @@ def password(request):
     else:
         return JsonResponse({'errno': 5001, 'msg': "请求方式错误"})
 
+
+@csrf_exempt
+def posted(request):
+    if request.method == 'GET':
+        user_id = request.session.get('id', 0)
+        if user_id == 0:
+            return JsonResponse({'errno': 9002, 'msg': "用户未登录"})
+        user = User.objects.get(id=user_id)
+        posts = []
+        for x in Post.objects.filter(user=user):
+            posts.append(x.to_dict())
+        return JsonResponse({'errno': 0, 'posts': posts})
+    else:
+        return JsonResponse({'errno': 9001, 'msg': "请求方式错误"})
+
+
+@csrf_exempt
+def history(request):
+    user_id = request.session.get('id', 0)
+    if user_id == 0:
+        return JsonResponse({'errno': 10002, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id', 0)
+        if post_id == 0:
+            return JsonResponse({'errno': 10003, 'msg': "帖子ID不能为空"})
+        post = Post.objects.get(id=post_id)
+        History.objects.create(user=user, post=post)
+        return JsonResponse({'errno': 0, 'msg': "添加历史记录成功"})
+    else:
+        posts = []
+        for x in History.objects.filter(user=user):
+            posts.append(Post.objects.get(id=x.post_id).to_dict())
+        return JsonResponse({'errno': 0, 'posts': posts})
+
+
+@csrf_exempt
+def favorites(request):
+    user_id = request.session.get('id', 0)
+    if user_id == 0:
+        return JsonResponse({'errno': 11002, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id', 0)
+        if post_id == 0:
+            return JsonResponse({'errno': 11003, 'msg': "帖子ID不能为空"})
+        if not Post.objects.filter(id=post_id).exists():
+            return JsonResponse({'errno': 11004, 'msg': "帖子不存在"})
+        post = Post.objects.get(id=post_id)
+        if request.POST.get('op') == 0:
+            Favorites.objects.create(user=user, post=post)
+            return JsonResponse({'errno': 0, 'msg': "添加历史记录成功"})
+        else:
+            if not Favorites.objects.filter(user=user, post=post):
+                return JsonResponse({'errno': 11005, 'msg': "历史记录不存在"})
+            favorites = Favorites.objects.get(user=user, post=post)
+            favorites.delete()
+            return JsonResponse({'errno': 0, 'msg': "删除历史记录成功"})
+    else:
+        posts = []
+        for x in Favorites.objects.filter(user=user):
+            posts.append(Post.objects.get(id=x.post_id).to_dict())
+        return JsonResponse({'errno': 0, 'posts': posts})

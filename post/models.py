@@ -25,6 +25,7 @@ class Post(models.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'user': User.objects.get(id=self.user_id).username,
             'type': self.type,
             'post_date': self.post_date,
@@ -36,7 +37,6 @@ class Post(models.Model):
         }
 
 
-
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -45,3 +45,12 @@ class Comment(models.Model):
     content = models.TextField()
     likes = models.IntegerField(default=0)
 
+
+class History(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+
+class Favorites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)

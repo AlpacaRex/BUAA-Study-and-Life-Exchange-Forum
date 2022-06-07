@@ -8,4 +8,7 @@ urlpatterns = [
     path('info/', info),
     path('issue/', issue),
     path('password/', password),
+    path('posted/', posted),
+    path('history/', history),
+    path('favorites/', favorites),
 ]

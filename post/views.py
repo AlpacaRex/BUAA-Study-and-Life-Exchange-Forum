@@ -82,4 +82,20 @@ def comment(request):
         return JsonResponse({'errno': 0, 'post': post.to_dict(), 'comments': comments})
 
 
+@csrf_exempt
+def search(request):
+    user_id = request.session.get('id', 0)
+    if user_id == 0:
+        return JsonResponse({'errno': 8002, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        keyword = request.POST.get('keyword')
+        if not keyword:
+            return JsonResponse({'errno': 8003, 'msg': "搜索关键字不能为空"})
+        posts = []
+        for x in Post.objects.filter(title__icontains=keyword):
+            posts.append(x.to_dict())
+        return JsonResponse({'errno': 0, 'posts': posts})
+    else:
+        return JsonResponse({'errno': 8001, 'msg': "请求方式错误"})
 
