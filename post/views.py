@@ -28,6 +28,9 @@ def new(request):
         if request.POST.get('available_level'):
             post.available_level = request.POST.get('available_level')
         post.save()
+        if request.FILES.get('resource'):
+            post.resource = request.FILES.get('resource')
+        post.save()
         comment = Comment()
         comment.post = post
         comment.user = user
@@ -41,10 +44,11 @@ def new(request):
 
 @csrf_exempt
 def comment(request):
+    user_id = request.session.get('id', 0)
+    if user_id == 0:
+        return JsonResponse({'errno': 7002, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
     if request.method == 'POST':
-        user_id = request.session.get('id', 0)
-        if user_id == 0:
-            return JsonResponse({'errno': 7002, 'msg': "用户未登录"})
         post_id = request.POST.get('post_id', 0)
         if post_id == 0:
             return JsonResponse({'errno': 7003, 'msg': "帖子ID不能为空"})
@@ -53,7 +57,6 @@ def comment(request):
         if not Post.objects.filter(id=post_id).exists():
             return JsonResponse({'errno': 7005, 'msg': "帖子不存在"})
         post = Post.objects.get(id=post_id)
-        user = User.objects.get(id=user_id)
         comment = Comment()
         comment.post = post
         comment.user = user
@@ -64,7 +67,19 @@ def comment(request):
         comment.save()
         return JsonResponse({'errno': 0, 'msg': "评论发布成功"})
     else:
-        return JsonResponse({'errno': 7001, 'msg': "请求方式错误"})
+        post_id = request.GET.get('post_id', 0)
+        if post_id == 0:
+            return JsonResponse({'errno': 7003, 'msg': "帖子ID不能为空"})
+        if not Post.objects.filter(id=post_id).exists():
+            return JsonResponse({'errno': 7005, 'msg': "帖子不存在"})
+        post = Post.objects.get(id=post_id)
+        comments = [{
+            'floor': x.floor,
+            'comment_time': x.comment_time,
+            'content': x.content,
+            'user': User.objects.get(id=x.user.id).to_dict(),
+        } for x in Comment.objects.filter(post=post)]
+        return JsonResponse({'errno': 0, 'post': post.to_dict(), 'comments': comments})
 
 
 

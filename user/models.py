@@ -28,3 +28,14 @@ class User(models.Model):
             return self.headshot.url
         else:
             return '/media/default/user.jpeg'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'description': self.description,
+            'grade': self.grade,
+            'major': self.major,
+            'sex': self.sex,
+            'headshot': self.photo_url()
+        }
