@@ -30,12 +30,13 @@ def login(request):
     if request.method == 'POST':
         id = request.POST.get('id')
         password = request.POST.get('password')
-        user = User.objects.get(id=id)
-        if user.password == password:
-            request.session['id'] = id
-            return JsonResponse({'errno': 0, 'msg': "登录成功", 'username': user.username})
-        elif user:
-            return JsonResponse({'errno': 2002, 'msg': "密码错误"})
+        if User.objects.filter(id=id).exists():
+            user = User.objects.get(id=id)
+            if user.password == password:
+                request.session['id'] = id
+                return JsonResponse({'errno': 0, 'msg': "登录成功", 'username': user.username})
+            else:
+                return JsonResponse({'errno': 2002, 'msg': "密码错误"})
         else:
             return JsonResponse({'errno': 2003, 'msg': "用户不存在"})
     else:
@@ -50,10 +51,11 @@ def logout(request):
 
 @csrf_exempt
 def info(request):
-    user_id = request.session['id']
-    user = User.objects.get(id=user_id)
-    if not user:
+    user_id = request.session.get('id', 0)
+    print(user_id)
+    if user_id == 0:
         return JsonResponse({'errno': 3001, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
     if request.method == 'POST':
         if request.POST.get('username'):
             user.username = request.POST.get('username')
