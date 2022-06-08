@@ -137,7 +137,7 @@ def like(request):
     if request.method == 'POST':
         user_id = request.session.get('id', 0)
         if user_id == 0:
-            return JsonResponse({'errno': 13003, 'msg': "用户未登录"})
+            return JsonResponse({'errno': 13002, 'msg': "用户未登录"})
         if request.POST.get('post_id'):
             post_id = request.POST.get('post_id')
             post = Post.objects.get(id=post_id)
