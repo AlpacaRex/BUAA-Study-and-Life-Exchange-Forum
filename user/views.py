@@ -98,7 +98,7 @@ def info(request):
 def issue(request):
     if request.method == 'GET':
         id = request.GET.get('id')
-        if User.objects.filter(id=id):
+        if User.objects.filter(id=id).exists():
             user = User.objects.get(id=id)
             return JsonResponse({'errno': 0, 'security_issue': user.security_issue})
         else:
