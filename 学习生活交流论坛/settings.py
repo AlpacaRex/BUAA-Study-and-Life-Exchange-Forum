@@ -39,11 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user.apps.PublishConfig',
     'post.apps.PostConfig',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -81,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',   # 数据库引擎
         'NAME': 'bslef',  # 数据库名，先前创建的
         'USER': 'root',     # 用户名，可以自己创建用户
-        'PASSWORD': '***',  # 密码
+        'PASSWORD': 'zxcvbnwty312424',  # 密码
         'HOST': 'localhost',  # mysql服务所在的主机ip
         'PORT': '3306',         # mysql服务端口
     }
@@ -133,3 +135,32 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 跨域增加忽略
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ()
+# 对应的发送的请求的跨域
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)
+
+CORS_ORIGIN_ALLOW_ALL = True
