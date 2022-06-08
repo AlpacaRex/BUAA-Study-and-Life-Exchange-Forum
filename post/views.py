@@ -152,3 +152,24 @@ def like(request):
             return JsonResponse({'errno': 13003, 'msg': "帖子/评论ID不能为空"})
     else:
         return JsonResponse({'errno': 13001, 'msg': "请求方式错误"})
+
+
+@csrf_exempt
+def delete(request):
+    if request.method == 'POST':
+        user_id = request.session.get('id', 0)
+        if user_id == 0:
+            return JsonResponse({'errno': 14002, 'msg': "用户未登录"})
+        user = User.objects.get(id=user_id)
+        post_id = request.POST.get('post_id', 0)
+        if post_id == 0:
+            return JsonResponse({'errno': 14003, 'msg': "帖子ID不能为空"})
+        if not Post.objects.filter(id=post_id).exists():
+            return JsonResponse({'errno': 14004, 'msg': "帖子不存在"})
+        post = Post.objects.get(id=post_id)
+        if user != post.user:
+            return JsonResponse({'errno': 14005, 'msg': "无法删除别人发布的帖子"})
+        post.delete()
+        return JsonResponse({'errno': 0, 'msg': "删帖成功"})
+    else:
+        return JsonResponse({'errno': 14001, 'msg': "请求方式错误"})

@@ -9,4 +9,5 @@ urlpatterns = [
     path('search/', search),
     path('browse/', browse),
     path('like/', like),
+    path('delete/', delete)
 ]
