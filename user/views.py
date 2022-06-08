@@ -36,6 +36,8 @@ def login(request):
             user = User.objects.get(id=id)
             if user.password == password:
                 request.session['id'] = id
+                if user.first_login:
+                    user.first_login = False
                 return JsonResponse({'errno': 0, 'msg': "登录成功", 'username': user.username})
             else:
                 return JsonResponse({'errno': 2002, 'msg': "密码错误"})
@@ -68,6 +70,10 @@ def info(request):
             user.major = request.POST.get('major')
         if request.POST.get('sex'):
             user.sex = request.POST.get('sex')
+        if request.POST.get('security_issue'):
+            user.security_issue = request.POST.get('security_issue')
+        if request.POST.get('security_answer'):
+            user.security_answer = request.POST.get('security_answer')
         if request.FILES.get('headshot'):
             user.headshot = request.FILES.get('headshot')
         user.save()
@@ -77,6 +83,7 @@ def info(request):
             'id': user.id,
             'username': user.username,
             'description': user.description,
+            'level': user.level,
             'grade': user.grade,
             'major': user.major,
             'sex': user.sex,
@@ -129,17 +136,27 @@ def posted(request):
 
 @csrf_exempt
 def history(request):
+    user_id = request.session.get('id', 0)
+    if user_id == 0:
+        return JsonResponse({'errno': 10001, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
     if request.method == 'GET':
-        user_id = request.session.get('id', 0)
-        if user_id == 0:
-            return JsonResponse({'errno': 10002, 'msg': "用户未登录"})
-        user = User.objects.get(id=user_id)
         posts = []
         for x in History.objects.filter(user=user):
             posts.append(Post.objects.get(id=x.post_id).to_dict())
         return JsonResponse({'errno': 0, 'posts': posts})
-    else:
-        return JsonResponse({'errno':10001, 'msg': "请求方式错误"})
+    elif request.method == 'POST':
+        post_id = request.POST.get('post_id', 0)
+        if post_id == 0:
+            return JsonResponse({'errno': 10002, 'msg': "帖子ID不能为空"})
+        if not Post.objects.filter(id=post_id):
+            return JsonResponse({'errno': 10003, 'msg': "帖子不存在"})
+        post = Post.objects.get(id=post_id)
+        if not History.objects.filter(user=user, post=post).exists():
+            return JsonResponse({'errno': 10004, 'msg': "历史记录不存在"})
+        history = History.objects.get(user=user, post=post)
+        history.delete()
+        return JsonResponse({'errno':0, 'msg': "删除历史记录成功"})
 
 
 @csrf_exempt
