@@ -113,11 +113,15 @@ def search(request):
         return JsonResponse({'errno': 8001, 'msg': "请求方式错误"})
 
 
+@csrf_exempt
 def browse(request):
     if request.method == 'GET':
         posts = []
         type = request.GET.get('type')
         if type:
+            if type == '最新':
+                for x in Post.objects.all().order_by('-post_date')[0:10]:
+                    posts.append(x.to_dict())
             for x in Post.objects.filter(type=type):
                 posts.append(x.to_dict())
         else:
@@ -126,3 +130,25 @@ def browse(request):
         return JsonResponse({'errno': 0, 'posts': posts})
     else:
         return JsonResponse({'errno': 12001, 'msg': "请求方式错误"})
+
+
+@csrf_exempt
+def like(request):
+    if request.method == 'POST':
+        user_id = request.session.get('id', 0)
+        if user_id == 0:
+            return JsonResponse({'errno': 13003, 'msg': "用户未登录"})
+        if request.POST.get('post_id'):
+            post_id = request.POST.get('post_id')
+            post = Post.objects.get(id=post_id)
+            post.likes += 1
+            return JsonResponse({'errno': 0, 'msg': "点赞成功"})
+        elif request.POST.get('comment_id'):
+            comment_id = request.POST.get('comment_id')
+            comment = Comment.objects.get(id=comment_id)
+            comment.likes += 1
+            return JsonResponse({'errno': 0, 'msg': "点赞成功"})
+        else:
+            return JsonResponse({'errno': 13003, 'msg': "帖子/评论ID不能为空"})
+    else:
+        return JsonResponse({'errno': 13001, 'msg': "请求方式错误"})
