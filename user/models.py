@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 def user_directory_path(instance, filename):
     ext = filename.split('.')[-1]

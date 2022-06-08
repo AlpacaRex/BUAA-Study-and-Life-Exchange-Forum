@@ -90,10 +90,12 @@ def comment(request):
             'floor': x.floor,
             'comment_time': x.comment_time,
             'content': x.content,
+            'liked': LikedComment.objects.filter(user=user, comment=x).exists(),
             'user': User.objects.get(id=x.user.id).to_dict(),
         } for x in Comment.objects.filter(post=post)]
         post_dict = post.to_dict()
         post_dict['favorite'] = Favorites.objects.filter(user=user, post=post).exists()
+        post_dict['liked'] = LikedPost.objects.filter(user=user, post=post).exists()
         print(post_dict)
         return JsonResponse({'errno': 0, 'post': post_dict, 'comments': comments})
 
@@ -141,16 +143,29 @@ def like(request):
         user_id = request.session.get('id', 0)
         if user_id == 0:
             return JsonResponse({'errno': 13002, 'msg': "用户未登录"})
+        user = User.objects.get(id=user_id)
         if request.POST.get('post_id'):
             post_id = request.POST.get('post_id')
             post = Post.objects.get(id=post_id)
             post.likes += 1
-            return JsonResponse({'errno': 0, 'msg': "点赞成功"})
+            if LikedPost.objects.filter(user=user, post=post).exists():
+                liked_post = LikedPost.objects.get(user=user, post=post)
+                liked_post.delete()
+                return JsonResponse({'errno': 0, 'msg': "取消点赞成功"})
+            else:
+                LikedPost.objects.create(user=user, post=post)
+                return JsonResponse({'errno': 0, 'msg': "点赞成功"})
         elif request.POST.get('comment_id'):
             comment_id = request.POST.get('comment_id')
             comment = Comment.objects.get(id=comment_id)
             comment.likes += 1
-            return JsonResponse({'errno': 0, 'msg': "点赞成功"})
+            if LikedComment.objects.filter(user=user, comment=comment).exists():
+                liked_post = LikedComment.objects.get(user=user, comment=comment)
+                liked_post.delete()
+                return JsonResponse({'errno': 0, 'msg': "取消点赞成功"})
+            else:
+                LikedComment.objects.create(user=user, comment=comment)
+                return JsonResponse({'errno': 0, 'msg': "点赞成功"})
         else:
             return JsonResponse({'errno': 13003, 'msg': "帖子/评论ID不能为空"})
     else:
