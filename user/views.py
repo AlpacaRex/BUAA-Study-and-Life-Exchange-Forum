@@ -9,7 +9,7 @@ from django.http import JsonResponse
 @csrf_exempt
 def register(request):
     if request.method == 'POST':
-        id = int(request.POST.get('id'))
+        id = request.POST.get('id')
         username = request.POST.get('username')
         password_1 = request.POST.get('password_1')
         password_2 = request.POST.get('password_2')
@@ -97,9 +97,9 @@ def info(request):
 @csrf_exempt
 def issue(request):
     if request.method == 'GET':
-        id = int(request.GET.get('id'))
-        user = User.objects.get(id=id)
-        if user:
+        id = request.GET.get('id')
+        if User.objects.filter(id=id):
+            user = User.objects.get(id=id)
             return JsonResponse({'errno': 0, 'security_issue': user.security_issue})
         else:
             return JsonResponse({'errno': 4002, 'msg': "用户不存在"})
@@ -110,7 +110,9 @@ def issue(request):
 @csrf_exempt
 def password(request):
     if request.method == 'POST':
-        id = int(request.POST.get('id'))
+        id = request.POST.get('id')
+        if not User.objects.filter(id=id).exists():
+            return JsonResponse({'errno': 5003, 'msg': "用户不存在"})
         user = User.objects.get(id=id)
         security_answer = request.POST.get('security_answer')
         if security_answer == user.security_answer:
@@ -150,14 +152,16 @@ def history(request):
     elif request.method == 'POST':
         post_id = request.POST.get('post_id', 0)
         if post_id == 0:
-            return JsonResponse({'errno': 10002, 'msg': "帖子ID不能为空"})
-        if not Post.objects.filter(id=post_id):
-            return JsonResponse({'errno': 10003, 'msg': "帖子不存在"})
-        post = Post.objects.get(id=post_id)
-        if not History.objects.filter(user=user, post=post).exists():
-            return JsonResponse({'errno': 10004, 'msg': "历史记录不存在"})
-        history = History.objects.get(user=user, post=post)
-        history.delete()
+            history = History.objects.filter(user=user)
+            history.delete()
+        else:
+            if not Post.objects.filter(id=post_id):
+                return JsonResponse({'errno': 10002, 'msg': "帖子不存在"})
+            post = Post.objects.get(id=post_id)
+            if not History.objects.filter(user=user, post=post).exists():
+                return JsonResponse({'errno': 10003, 'msg': "历史记录不存在"})
+            history = History.objects.get(user=user, post=post)
+            history.delete()
         return JsonResponse({'errno':0, 'msg': "删除历史记录成功"})
 
 
