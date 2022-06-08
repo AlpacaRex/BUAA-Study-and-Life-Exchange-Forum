@@ -87,6 +87,8 @@ def info(request):
             'grade': user.grade,
             'major': user.major,
             'sex': user.sex,
+            'security_issue': user.security_issue,
+            'security_answer': user.security_answer,
             'headshot': user.photo_url()
         }
         return JsonResponse({'errno': 0, 'data': data})
