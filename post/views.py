@@ -87,6 +87,7 @@ def comment(request):
         else:
             History.objects.create(user=user, post=post)
         comments = [{
+            'id': x.id,
             'floor': x.floor,
             'comment_time': x.comment_time,
             'content': x.content,
