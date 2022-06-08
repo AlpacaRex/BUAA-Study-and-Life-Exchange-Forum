@@ -92,7 +92,10 @@ def comment(request):
             'content': x.content,
             'user': User.objects.get(id=x.user.id).to_dict(),
         } for x in Comment.objects.filter(post=post)]
-        return JsonResponse({'errno': 0, 'post': post.to_dict(), 'comments': comments})
+        post_dict = post.to_dict()
+        post_dict['favorite'] = Favorites.objects.filter(user=user, post=post).exists()
+        print(post_dict)
+        return JsonResponse({'errno': 0, 'post': post_dict, 'comments': comments})
 
 
 @csrf_exempt
