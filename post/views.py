@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 # Create your views here.
+from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
 from post.models import *
@@ -26,6 +27,8 @@ def new(request):
         post.title = request.POST.get('title')
         post.type = request.POST.get('type')
         if request.POST.get('available_level'):
+            if int(request.POST.get('available_level')) > user.level:
+                return JsonResponse({'errno': 6006, 'msg': "权限等级不能高于用户等级"})
             post.available_level = request.POST.get('available_level')
         post.save()
         if request.FILES.get('resource'):
@@ -57,6 +60,8 @@ def comment(request):
         if not Post.objects.filter(id=post_id).exists():
             return JsonResponse({'errno': 7005, 'msg': "帖子不存在"})
         post = Post.objects.get(id=post_id)
+        if post.available_level > user.level:
+            return JsonResponse({'errno': 7006, 'msg': "用户等级不够"})
         comment = Comment()
         comment.post = post
         comment.user = user
@@ -73,6 +78,14 @@ def comment(request):
         if not Post.objects.filter(id=post_id).exists():
             return JsonResponse({'errno': 7005, 'msg': "帖子不存在"})
         post = Post.objects.get(id=post_id)
+        if post.available_level > user.level:
+            return JsonResponse({'errno': 7006, 'msg': "用户等级不够"})
+        if History.objects.filter(user=user, post=post).exists():
+            history = History.objects.get(user=user, post=post)
+            history.browse_time = now()
+            history.save()
+        else:
+            History.objects.create(user=user, post=post)
         comments = [{
             'floor': x.floor,
             'comment_time': x.comment_time,
@@ -99,3 +112,17 @@ def search(request):
     else:
         return JsonResponse({'errno': 8001, 'msg': "请求方式错误"})
 
+
+def browse(request):
+    if request.method == 'GET':
+        posts = []
+        type = request.GET.get('type')
+        if type:
+            for x in Post.objects.filter(type=type):
+                posts.append(x.to_dict())
+        else:
+            for x in Post.objects.all():
+                posts.append(x.to_dict())
+        return JsonResponse({'errno': 0, 'posts': posts})
+    else:
+        return JsonResponse({'errno': 12001, 'msg': "请求方式错误"})

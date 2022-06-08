@@ -49,6 +49,7 @@ class Comment(models.Model):
 class History(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    browse_time = models.DateTimeField(auto_now_add=True)
 
 
 class Favorites(models.Model):
