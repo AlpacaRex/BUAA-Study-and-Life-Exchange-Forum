@@ -11,4 +11,5 @@ urlpatterns = [
     path('posted/', posted),
     path('history/', history),
     path('favorites/', favorites),
+    path('ban/', ban),
 ]

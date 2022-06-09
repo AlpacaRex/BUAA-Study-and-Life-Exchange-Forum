@@ -22,6 +22,8 @@ def new(request):
             return JsonResponse({'errno': 6004, 'msg': "类型不能为空"})
         elif not request.POST.get('content'):
             return JsonResponse({'errno': 6005, 'msg': "内容不能为空"})
+        elif user.banned:
+            return JsonResponse({'errno': 6007, 'msg': "被禁言用户不能发帖"})
         post = Post()
         post.user = user
         post.title = request.POST.get('title')
@@ -60,6 +62,8 @@ def comment(request):
         if not Post.objects.filter(id=post_id).exists():
             return JsonResponse({'errno': 7005, 'msg': "帖子不存在"})
         post = Post.objects.get(id=post_id)
+        if user.banned:
+            return JsonResponse({'errno': 7007, 'msg': "被禁言用户不能发表评论"})
         if post.available_level > user.level:
             return JsonResponse({'errno': 7006, 'msg': "用户等级不够"})
         comment = Comment()
@@ -127,8 +131,9 @@ def browse(request):
             if type == '最新':
                 for x in Post.objects.all().order_by('-post_date')[0:10]:
                     posts.append(x.to_dict())
-            for x in Post.objects.filter(type=type):
-                posts.append(x.to_dict())
+            else:
+                for x in Post.objects.filter(type=type):
+                    posts.append(x.to_dict())
         else:
             for x in Post.objects.all():
                 posts.append(x.to_dict())

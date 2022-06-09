@@ -16,7 +16,7 @@ class User(models.Model):
     grade = models.IntegerField(null=True)
     major = models.CharField(max_length=20)
     level = models.IntegerField(default=1)
-    blockTime = models.IntegerField(default=0)
+    banned = models.BooleanField(default=False)
     first_login = models.BooleanField(default=True)
     headshot = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
     security_issue = models.CharField(max_length=255, default="密保问题")

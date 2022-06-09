@@ -88,6 +88,7 @@ def info(request):
             'grade': user.grade,
             'major': user.major,
             'sex': user.sex,
+            'banned': user.banned,
             'password': user.password,
             'security_issue': user.security_issue,
             'security_answer': user.security_answer,
@@ -197,3 +198,30 @@ def favorites(request):
         for x in Favorites.objects.filter(user=user):
             posts.append(Post.objects.get(id=x.post_id).to_dict())
         return JsonResponse({'errno': 0, 'posts': posts})
+
+
+@csrf_exempt
+def ban(request):
+    user_id = request.session.get('id', 0)
+    if user_id == 0:
+        return JsonResponse({'errno': 16001, 'msg': "用户未登录"})
+    user = User.objects.get(id=user_id)
+    if user.level < 100:
+        return JsonResponse({'errno': 16002, 'msg': "非管理员用户不能禁言用户"})
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id', 0)
+        if not User.objects.filter(id=user_id).exists():
+            return JsonResponse({'errno': 16003, 'msg': "用户不存在"})
+        user = User.objects.get(id=user_id)
+        user.banned = not user.banned
+        user.save()
+        if user.banned:
+            return JsonResponse({'errno':0, 'msg': "封禁用户成功"})
+        else:
+            return JsonResponse({'errno': 0, 'msg': "解禁用户成功"})
+    else:
+        users = []
+        for x in User.objects.filter(banned=True):
+            users.append(user.to_dict())
+        return JsonResponse({'errno': 0, 'users': users})
+

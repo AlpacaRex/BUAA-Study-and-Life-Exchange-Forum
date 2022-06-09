@@ -41,6 +41,7 @@ class Post(models.Model):
         return {
             'id': self.id,
             'user': User.objects.get(id=self.user_id).username,
+            'user_id': User.objects.get(id=self.user_id).id,
             'type': self.type,
             'post_date': self.post_date,
             'title': self.title,
