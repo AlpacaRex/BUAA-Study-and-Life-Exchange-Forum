@@ -42,6 +42,8 @@ def new(request):
         comment.floor = 1
         comment.content = request.POST.get('content')
         comment.save()
+        user.level += 1
+        user.save()
         return JsonResponse({'errno': 0, 'msg': "新帖发布成功"})
     else:
         return JsonResponse({'errno': 6001, 'msg': "请求方式错误"})

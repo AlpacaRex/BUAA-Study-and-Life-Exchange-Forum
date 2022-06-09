@@ -72,6 +72,8 @@ def info(request):
             user.major = request.POST.get('major')
         if request.POST.get('sex'):
             user.sex = request.POST.get('sex')
+        if request.POST.get('password'):
+            user.password = request.POST.get('password')
         if request.POST.get('security_issue'):
             user.security_issue = request.POST.get('security_issue')
         if request.POST.get('security_answer'):
@@ -225,6 +227,6 @@ def ban(request):
     else:
         users = []
         for x in User.objects.filter(banned=True):
-            users.append(user.to_dict())
+            users.append(x.to_dict())
         return JsonResponse({'errno': 0, 'users': users})
 

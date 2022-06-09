@@ -12,7 +12,7 @@ class User(models.Model):
     username = models.CharField(max_length=20)
     password = models.CharField(max_length=20)
     description = models.TextField(default='')
-    sex = models.BooleanField(null=True)
+    sex = models.CharField(max_length=5, default='未知')
     grade = models.IntegerField(null=True)
     major = models.CharField(max_length=20)
     level = models.IntegerField(default=1)
