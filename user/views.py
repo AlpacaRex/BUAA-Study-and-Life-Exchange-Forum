@@ -20,7 +20,7 @@ def register(request):
             return JsonResponse({'errno': 1002, 'msg': "该学号已注册"})
         if password_1 != password_2:
             return JsonResponse({'errno': 1003, 'msg': "两次输入的密码不一致"})
-        User.objects.create(id=id, username=username, password=password_1, level=1, first_login=True, blockTime=0,
+        User.objects.create(id=id, username=username, password=password_1, level=1, first_login=True,
                             security_issue=security_issue, security_answer=security_answer)
         return JsonResponse({'errno': 0, 'msg': "成功"})
     else:
