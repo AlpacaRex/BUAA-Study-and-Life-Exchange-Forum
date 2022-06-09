@@ -43,6 +43,8 @@ def new(request):
         comment.content = request.POST.get('content')
         comment.save()
         user.level += 3
+        if user.level > 90 and user.level < 100:
+            user.level = 90
         user.save()
         return JsonResponse({'errno': 0, 'msg': "新帖发布成功"})
     else:
@@ -77,6 +79,8 @@ def comment(request):
         post.save()
         comment.save()
         user.level += 2
+        if user.level > 90 and user.level < 100:
+            user.level = 90
         user.save()
         return JsonResponse({'errno': 0, 'msg': "评论发布成功"})
     else:
@@ -168,6 +172,8 @@ def like(request):
             else:
                 post_user = post.user
                 post_user.level += 1
+                if post_user.level > 90 and post_user.level < 100:
+                    post_user.level = 90
                 post_user.save()
                 post.likes += 1
                 post.save()
