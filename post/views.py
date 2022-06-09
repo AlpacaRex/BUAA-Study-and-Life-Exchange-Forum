@@ -42,7 +42,7 @@ def new(request):
         comment.floor = 1
         comment.content = request.POST.get('content')
         comment.save()
-        user.level += 1
+        user.level += 3
         user.save()
         return JsonResponse({'errno': 0, 'msg': "新帖发布成功"})
     else:
@@ -76,6 +76,8 @@ def comment(request):
         comment.content = request.POST.get('content')
         post.save()
         comment.save()
+        user.level += 2
+        user.save()
         return JsonResponse({'errno': 0, 'msg': "评论发布成功"})
     else:
         post_id = request.GET.get('post_id', 0)
@@ -155,12 +157,18 @@ def like(request):
             post_id = request.POST.get('post_id')
             post = Post.objects.get(id=post_id)
             if LikedPost.objects.filter(user=user, post=post).exists():
+                post_user = post.user
+                post_user.level -= 1
+                post_user.save()
                 post.likes -= 1
                 post.save()
                 liked_post = LikedPost.objects.get(user=user, post=post)
                 liked_post.delete()
                 return JsonResponse({'errno': 0, 'msg': "取消点赞成功"})
             else:
+                post_user = post.user
+                post_user.level += 1
+                post_user.save()
                 post.likes += 1
                 post.save()
                 LikedPost.objects.create(user=user, post=post)
