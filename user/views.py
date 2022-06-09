@@ -210,8 +210,10 @@ def ban(request):
         return JsonResponse({'errno': 16002, 'msg': "非管理员用户不能禁言用户"})
     if request.method == 'POST':
         user_id = request.POST.get('user_id', 0)
+        if user_id == 0:
+            return JsonResponse({'errno': 16003, 'msg': "用户ID不能为空"})
         if not User.objects.filter(id=user_id).exists():
-            return JsonResponse({'errno': 16003, 'msg': "用户不存在"})
+            return JsonResponse({'errno': 16004, 'msg': "用户不存在"})
         user = User.objects.get(id=user_id)
         user.banned = not user.banned
         user.save()
