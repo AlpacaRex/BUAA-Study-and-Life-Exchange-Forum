@@ -1,3 +1,6 @@
+import datetime
+import time
+
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -104,7 +107,7 @@ def comment(request):
         comments = [{
             'id': x.id,
             'floor': x.floor,
-            'comment_time': x.comment_time,
+            'comment_time': x.comment_time.strftime("%Y-%m-%d %H:%M:%S"),
             'content': x.content,
             'liked': LikedComment.objects.filter(user=user, comment=x).exists(),
             'user': User.objects.get(id=x.user.id).to_dict(),
