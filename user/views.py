@@ -36,6 +36,7 @@ def login(request):
             user = User.objects.get(id=id)
             if user.password == password:
                 request.session['id'] = id
+                request.session['username'] = user.username
                 if user.first_login:
                     user.first_login = False
                 return JsonResponse({'errno': 0, 'msg': "登录成功", 'username': user.username})
