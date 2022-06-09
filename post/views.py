@@ -191,7 +191,7 @@ def delete(request):
         if not Post.objects.filter(id=post_id).exists():
             return JsonResponse({'errno': 14004, 'msg': "帖子不存在"})
         post = Post.objects.get(id=post_id)
-        if user != post.user:
+        if user != post.user and user.level < 100:
             return JsonResponse({'errno': 14005, 'msg': "无法删除别人发布的帖子"})
         post.delete()
         return JsonResponse({'errno': 0, 'msg': "删帖成功"})
