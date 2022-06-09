@@ -42,10 +42,11 @@ def new(request):
         comment.floor = 1
         comment.content = request.POST.get('content')
         comment.save()
-        user.level += 3
-        if user.level > 90 and user.level < 100:
-            user.level = 90
-        user.save()
+        if user.level != 100:
+            user.level += 3
+            if user.level > 90:
+                user.level = 90
+            user.save()
         return JsonResponse({'errno': 0, 'msg': "新帖发布成功"})
     else:
         return JsonResponse({'errno': 6001, 'msg': "请求方式错误"})
@@ -78,9 +79,11 @@ def comment(request):
         comment.content = request.POST.get('content')
         post.save()
         comment.save()
-        user.level += 2
-        if user.level > 90 and user.level < 100:
-            user.level = 90
+        if user.level != 100:
+            user.level += 2
+            if user.level > 90:
+                user.level = 90
+            user.save()
         user.save()
         return JsonResponse({'errno': 0, 'msg': "评论发布成功"})
     else:
@@ -162,8 +165,6 @@ def like(request):
             post = Post.objects.get(id=post_id)
             if LikedPost.objects.filter(user=user, post=post).exists():
                 post_user = post.user
-                post_user.level -= 1
-                post_user.save()
                 post.likes -= 1
                 post.save()
                 liked_post = LikedPost.objects.get(user=user, post=post)
@@ -171,10 +172,11 @@ def like(request):
                 return JsonResponse({'errno': 0, 'msg': "取消点赞成功"})
             else:
                 post_user = post.user
-                post_user.level += 1
-                if post_user.level > 90 and post_user.level < 100:
-                    post_user.level = 90
-                post_user.save()
+                if post_user.level != 100:
+                    post_user.level += 3
+                    if post_user.level > 90:
+                        post_user.level = 90
+                    post_user.save()
                 post.likes += 1
                 post.save()
                 LikedPost.objects.create(user=user, post=post)
