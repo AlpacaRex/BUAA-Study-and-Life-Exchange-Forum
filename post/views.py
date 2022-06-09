@@ -148,23 +148,29 @@ def like(request):
         if request.POST.get('post_id'):
             post_id = request.POST.get('post_id')
             post = Post.objects.get(id=post_id)
-            post.likes += 1
             if LikedPost.objects.filter(user=user, post=post).exists():
+                post.likes -= 1
+                post.save()
                 liked_post = LikedPost.objects.get(user=user, post=post)
                 liked_post.delete()
                 return JsonResponse({'errno': 0, 'msg': "取消点赞成功"})
             else:
+                post.likes += 1
+                post.save()
                 LikedPost.objects.create(user=user, post=post)
                 return JsonResponse({'errno': 0, 'msg': "点赞成功"})
         elif request.POST.get('comment_id'):
             comment_id = request.POST.get('comment_id')
             comment = Comment.objects.get(id=comment_id)
-            comment.likes += 1
             if LikedComment.objects.filter(user=user, comment=comment).exists():
+                comment.likes -= 1
+                comment.save()
                 liked_post = LikedComment.objects.get(user=user, comment=comment)
                 liked_post.delete()
                 return JsonResponse({'errno': 0, 'msg': "取消点赞成功"})
             else:
+                comment.likes += 1
+                comment.save()
                 LikedComment.objects.create(user=user, comment=comment)
                 return JsonResponse({'errno': 0, 'msg': "点赞成功"})
         else:

@@ -29,9 +29,8 @@ def register(request):
 
 @csrf_exempt
 def login(request):
-    request.session['id'] = 20373615
     if request.method == 'POST':
-        id = request.session.get('id')
+        id = request.POST.get('id')
         password = request.POST.get('password')
         if User.objects.filter(id=id).exists():
             user = User.objects.get(id=id)
@@ -57,11 +56,15 @@ def logout(request):
 
 @csrf_exempt
 def info(request):
-    user_id = request.session.get('id', 0)
-    print(user_id)
+    user_id = int(request.session.get('id', 0))
+    if request.session.exists('id'):
+        print(id)
+        print(1)
+    else:
+        print(0)
     if user_id == 0:
-        user_id = request.session['id'] = 20373615
-        # return JsonResponse({'errno': 3001, 'msg': "用户未登录"})
+        # user_id = request.session['id'] = 20373615
+        return JsonResponse({'errno': 3001, 'msg': "用户未登录"})
     user = User.objects.get(id=user_id)
     if request.method == 'POST':
         if request.POST.get('username'):
