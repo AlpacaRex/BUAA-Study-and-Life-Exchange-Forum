@@ -31,7 +31,7 @@ def register(request):
 def login(request):
     request.session['id'] = 20373615
     if request.method == 'POST':
-        id = request.POST.get('id')
+        id = request.session.get('id')
         password = request.POST.get('password')
         if User.objects.filter(id=id).exists():
             user = User.objects.get(id=id)
@@ -91,6 +91,7 @@ def info(request):
             'grade': user.grade,
             'major': user.major,
             'sex': user.sex,
+            'password': user.password,
             'security_issue': user.security_issue,
             'security_answer': user.security_answer,
             'headshot': user.photo_url()
