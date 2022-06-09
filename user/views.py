@@ -57,13 +57,7 @@ def logout(request):
 @csrf_exempt
 def info(request):
     user_id = int(request.session.get('id', 0))
-    if request.session.exists('id'):
-        print(id)
-        print(1)
-    else:
-        print(0)
     if user_id == 0:
-        # user_id = request.session['id'] = 20373615
         return JsonResponse({'errno': 3001, 'msg': "用户未登录"})
     user = User.objects.get(id=user_id)
     if request.method == 'POST':

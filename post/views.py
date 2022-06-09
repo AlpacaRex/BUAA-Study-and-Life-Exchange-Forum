@@ -97,7 +97,6 @@ def comment(request):
         post_dict = post.to_dict()
         post_dict['favorite'] = Favorites.objects.filter(user=user, post=post).exists()
         post_dict['liked'] = LikedPost.objects.filter(user=user, post=post).exists()
-        print(post_dict)
         return JsonResponse({'errno': 0, 'post': post_dict, 'comments': comments})
 
 
