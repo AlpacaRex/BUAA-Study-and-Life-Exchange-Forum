@@ -24,9 +24,9 @@ class User(models.Model):
 
     def photo_url(self):
         if self.headshot and hasattr(self.headshot, 'url'):
-            return self.headshot.url
+            return 'http://127.0.0.1:8000'+ self.headshot.url
         else:
-            return '/media/default/user.jpeg'
+            return 'http://127.0.0.1:8000/media/default/user.jpeg'
 
     def to_dict(self):
         return {
