@@ -220,5 +220,6 @@ def report(request):
             return JsonResponse({"errno": 15004, 'msg': "非管理员无法查看"})
         posts = []
         for x in Post.objects.all().order_by('-report_times'):
-            posts.append(x.to_dict_report())
+            if x.report_times > 0:
+                posts.append(x.to_dict_report())
         return JsonResponse({'errno': 0, 'posts': posts})
